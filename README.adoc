@@ -1,0 +1,46 @@
+= Go WebAPI Sample Project
+Steven Chen <steven@shellpays.com>
+v1.0.0, {docdate} {doctime}
+:description: A WebAPI Sample Project
+:keywords: Golang, Go, Echo
+:doctype: book
+:page-layout!:
+:page-description: {description}
+:page-keywords: {keywords}
+:toc: left
+:toclevels: 4
+:sectlinks:
+:sectanchors:
+:sectnums:
+:icons: font
+:source-highlighter: pygments
+:version: 1.0.0
+:docinfo: shared
+
+== 文档信息
+
+NOTE: 本文档用于合作伙伴间产品及技术整合使用，未经著作者授权，请勿将文档内容全部或部分拷贝或扩散。本文档尽力保持其内容的完整性和正确性，但无法对内容的错误和疏漏部分负责。因此，本文档著作者不承担因使用本文档所产生的责任。
+
+* 关于本文档
++
+本文档主要描述软件包制品相关名称、说明、标识、版本以及数据存储说明、源代码库 URL、容器制品 URL、API文档 URL等概要信息，以便开发实施人员在工作时作为参考和备忘。
++
+此文档作为持续交付说明，将包含未来软件制品的更新和版本记录。
+
+* 文档阅读对象
+
+* 联络方式
++
+如果您对于本文件内容有任何疑问，或发现任何错误，请通过以上述邮箱地址联络我们
+
+== 文档修订记录
+
+[cols=3*,options="header"]
+|===
+| 版本 | 时间 | 变更摘要
+| 1.0.0 | 2021-04-19 | 创建文档
+|===
+
+== 概要
+
+TODO
