@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -35,6 +36,7 @@ func init() {
 
 func New() Echolet {
 	echo := Echolet{echo.New()}
+	echo.Static(pathOf("/assets"), "assets")
 	echo.HideBanner = true
 	// Custom log level and setup Logger middleware logs
 	// the information about each HTTP request.
@@ -72,19 +74,20 @@ func (e *Echolet) Serve() {
 
 	// Make a chan to receive the sys signal to shutdown the server
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	// Block the main goroutine waiting the shutdown signal
 	<-quit
-
+	e.Logger.Info("Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
+	e.Logger.Info("Server stutdown.")
 }
 
-func (rc RoutingContext) RespJson(payload interface{}, err error) error {
+func (rc RoutingContext) JsonWrap(payload interface{}, err error) error {
 	if err != nil {
 		rc.Logger().Error(err)
 		return rc.JSON(200, &respBodyWrapper{StatusCode: 500, StatusText: err.Error()})
@@ -158,8 +161,8 @@ func (rc RoutingContext) Gatewayimeout() error {
 }
 
 // Inspect server configuration
-func inspect(c RoutingContext) error {
-	return c.JSON(200, serverConfig)
+func inspect(rc RoutingContext) error {
+	return rc.JsonWrap(serverConfig, nil)
 }
 
 func pathOf(path string) string {

@@ -6,12 +6,6 @@ import (
 	"strconv"
 )
 
-var repos Repos
-
-func init() {
-	repos = CreateRepos()
-}
-
 func startAPIServer() {
 	el := echolet.New()
 
@@ -30,12 +24,12 @@ func createProduct(rc echolet.RoutingContext) error {
 		return rc.BadRequest()
 	}
 	err := repos.create(rc.Request().Context(), p)
-	return rc.RespJson(p, err)
+	return rc.JsonWrap(p, err)
 }
 
 func listProducts(rc echolet.RoutingContext) error {
 	rs, err := repos.list(rc.Request().Context())
-	return rc.RespJson(rs, err)
+	return rc.JsonWrap(rs, err)
 }
 
 func deleteProduct(rc echolet.RoutingContext) error {
@@ -45,7 +39,7 @@ func deleteProduct(rc echolet.RoutingContext) error {
 		return rc.BadRequest()
 	}
 	err = repos.deleteById(rc.Request().Context(), id)
-	return rc.RespJson(nil, err)
+	return rc.JsonWrap(nil, err)
 }
 
 func updateProduct(rc echolet.RoutingContext) error {
@@ -60,5 +54,5 @@ func updateProduct(rc echolet.RoutingContext) error {
 		return rc.BadRequest()
 	}
 	np, err := repos.updateById(rc.Request().Context(), iid, p)
-	return rc.RespJson(np, err)
+	return rc.JsonWrap(np, err)
 }

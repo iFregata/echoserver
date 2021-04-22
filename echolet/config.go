@@ -41,7 +41,7 @@ func LoadMySqlDSN() *MySqlDSN {
 func LoadServerConfig() *ServerConfig {
 	return loadConfigFile("config/server.json", &ServerConfig{
 		Name:         "Biz WebAPI Server",
-		Developer:    "Gorux",
+		Developer:    "Steven Chen",
 		Version:      "v1.0.0",
 		Branch:       "Dev",
 		LogLevel:     "off",

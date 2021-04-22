@@ -1,6 +1,6 @@
 {
   "name": "Gorux WebAPI Servr",
   "port": 8181,
-  "context_path": "/gorux",
+  "context_path": "/api",
   "log_level": "debug"
 }

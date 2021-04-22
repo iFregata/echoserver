@@ -1,4 +1,4 @@
 {
   "dbname": "gorux",
-  "pool_size": 20
+  "pool_size": 100
 }
