@@ -1,23 +1,23 @@
 package main
 
 import (
-	"echoserver/echolet"
+	"echoserver/echox"
 	"encoding/json"
 	"strconv"
 )
 
 func startAPIServer() {
-	el := echolet.New()
+	ex := echox.New()
 
-	el.POST("/products", createProduct)
-	el.GET("/products", listProducts)
-	el.PUT("/products/:id", updateProduct)
-	el.DELETE("/products/:id", deleteProduct)
+	ex.POST("/products", createProduct)
+	ex.GET("/products", listProducts)
+	ex.PUT("/products/:id", updateProduct)
+	ex.DELETE("/products/:id", deleteProduct)
 
-	el.Serve()
+	ex.Serve()
 }
 
-func createProduct(rc echolet.RoutingContext) error {
+func createProduct(rc echox.RoutingContext) error {
 	p := new(Product)
 	if err := json.NewDecoder(rc.Request().Body).Decode(p); err != nil {
 		rc.Logger().Error(err)
@@ -27,12 +27,12 @@ func createProduct(rc echolet.RoutingContext) error {
 	return rc.JsonWrap(p, err)
 }
 
-func listProducts(rc echolet.RoutingContext) error {
+func listProducts(rc echox.RoutingContext) error {
 	rs, err := repos.list(rc.Request().Context())
 	return rc.JsonWrap(rs, err)
 }
 
-func deleteProduct(rc echolet.RoutingContext) error {
+func deleteProduct(rc echox.RoutingContext) error {
 	strid := rc.Param("id")
 	id, err := strconv.Atoi(strid)
 	if err != nil {
@@ -42,7 +42,7 @@ func deleteProduct(rc echolet.RoutingContext) error {
 	return rc.JsonWrap(nil, err)
 }
 
-func updateProduct(rc echolet.RoutingContext) error {
+func updateProduct(rc echox.RoutingContext) error {
 	id := rc.Param("id")
 	iid, err := strconv.Atoi(id)
 	if err != nil {

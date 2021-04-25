@@ -1,4 +1,8 @@
 {
+  "host": "localhost",
+  "port": 3306,
+  "user": "root",
+  "pass": "pass4pass",
   "dbname": "gorux",
-  "pool_size": 100
+  "pool_size": 20
 }

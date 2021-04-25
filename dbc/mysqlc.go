@@ -1,7 +1,8 @@
-package echolet
+package dbc
 
 import (
 	"database/sql"
+	"echoserver/gorux"
 	"fmt"
 	"log"
 	"sync"
@@ -10,12 +11,21 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type MySqlDSN struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	User     string `json:"user"`
+	Pass     string `json:"pass"`
+	DbName   string `json:"dbname"`
+	PoolSize int    `json:"pool_size"`
+}
+
 var once sync.Once
 
 func ConnectMySQL() *sql.DB {
 	var db *sql.DB
 	once.Do(func() {
-		cnf := LoadMySqlDSN()
+		cnf := loadMySqlDSN()
 		//[username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", cnf.User, cnf.Pass, cnf.Host, cnf.Port, cnf.DbName)
 		var err error
@@ -47,4 +57,14 @@ func ConnectMySQL() *sql.DB {
 		}
 	})
 	return db
+}
+func loadMySqlDSN() *MySqlDSN {
+	return gorux.LoadConfigFile("config/mysqlc.json", &MySqlDSN{
+		Host:     "localhost",
+		Port:     3306,
+		User:     "root",
+		Pass:     "pass4pass",
+		DbName:   "gorux",
+		PoolSize: 10,
+	}).(*MySqlDSN)
 }

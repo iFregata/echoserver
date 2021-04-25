@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
-	"echoserver/echolet"
+	"echoserver/dbc"
 	"time"
 )
 
@@ -25,8 +25,8 @@ type reposInteranl struct {
 	*sql.DB
 }
 
-func CreateRepos() Repos {
-	return &reposInteranl{echolet.ConnectMySQL()}
+func NewRepos() Repos {
+	return &reposInteranl{dbc.ConnectMySQL()}
 }
 
 func (repos *reposInteranl) list(ctx context.Context) ([]Product, error) {

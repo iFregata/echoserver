@@ -1,7 +1,8 @@
-package echolet
+package echox
 
 import (
 	"context"
+	"echoserver/gorux"
 	"fmt"
 	"net/http"
 	"os"
@@ -14,7 +15,18 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-type Echolet struct {
+type ServerConfig struct {
+	Name         string `json:"name"`
+	Developer    string `json:"developer"`
+	Version      string `json:"version"`
+	Branch       string `json:"branch"`
+	Port         int    `json:"port"`
+	ContextPath  string `json:"context_path"`
+	LogLevel     string `json:"log_level"`
+	EnableLogger bool   `json:"enable_logger"`
+}
+
+type EchoNi struct {
 	*echo.Echo
 }
 
@@ -31,41 +43,41 @@ type respBodyWrapper struct {
 var serverConfig *ServerConfig
 
 func init() {
-	serverConfig = LoadServerConfig()
+	serverConfig = loadServerConfig()
 }
 
-func New() Echolet {
-	echo := Echolet{echo.New()}
+func New() EchoNi {
+	echo := EchoNi{echo.New()}
 	echo.Static(pathOf("/assets"), "assets")
 	echo.HideBanner = true
 	// Custom log level and setup Logger middleware logs
 	// the information about each HTTP request.
 	echo.customLog()
 	// Setup the `liveness, readiness, inspect` routing
-	echo.commonRouting()
+	echo.builtinRouting()
 	return echo
 }
 
-func (e *Echolet) GET(path string, fn func(c RoutingContext) error) {
+func (e *EchoNi) GET(path string, fn func(c RoutingContext) error) {
 	e.Echo.GET(pathOf(path), func(c echo.Context) error { return fn(RoutingContext{c}) })
 }
-func (e *Echolet) POST(path string, fn func(c RoutingContext) error) {
+func (e *EchoNi) POST(path string, fn func(c RoutingContext) error) {
 	e.Echo.POST(pathOf(path), func(c echo.Context) error { return fn(RoutingContext{c}) })
 }
-func (e *Echolet) PUT(path string, fn func(c RoutingContext) error) {
+func (e *EchoNi) PUT(path string, fn func(c RoutingContext) error) {
 	e.Echo.PUT(pathOf(path), func(c echo.Context) error { return fn(RoutingContext{c}) })
 }
-func (e *Echolet) PATCH(path string, fn func(c RoutingContext) error) {
+func (e *EchoNi) PATCH(path string, fn func(c RoutingContext) error) {
 	e.Echo.PATCH(pathOf(path), func(c echo.Context) error { return fn(RoutingContext{c}) })
 }
-func (e *Echolet) DELETE(path string, fn func(c RoutingContext) error) {
+func (e *EchoNi) DELETE(path string, fn func(c RoutingContext) error) {
 	e.Echo.DELETE(pathOf(path), func(c echo.Context) error { return fn(RoutingContext{c}) })
 }
-func (e *Echolet) HEAD(path string, fn func(c RoutingContext) error) {
+func (e *EchoNi) HEAD(path string, fn func(c RoutingContext) error) {
 	e.Echo.HEAD(pathOf(path), func(c echo.Context) error { return fn(RoutingContext{c}) })
 }
 
-func (e *Echolet) Serve() {
+func (e *EchoNi) Serve() {
 	go func() {
 		if err := e.Start(fmt.Sprintf(":%d", serverConfig.Port)); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("Shutting down the server")
@@ -98,7 +110,7 @@ func (rc RoutingContext) JsonWrap(payload interface{}, err error) error {
 	return rc.JSON(200, &respBodyWrapper{StatusCode: 200, StatusText: "Ok", Payload: &payload})
 }
 
-func (e *Echolet) commonRouting() {
+func (e *EchoNi) builtinRouting() {
 	okFn := func(rc RoutingContext) error { return rc.Ok() }
 	e.GET("/readiness", okFn)
 	e.GET("/liveness", okFn)
@@ -168,7 +180,7 @@ func inspect(rc RoutingContext) error {
 func pathOf(path string) string {
 	return fmt.Sprintf("%s%s", serverConfig.ContextPath, path)
 }
-func (e *Echolet) customLog() {
+func (e *EchoNi) customLog() {
 	if l, ok := e.Logger.(*log.Logger); ok {
 		l.SetHeader("${time_rfc3339} | ${level} | ${short_file} |")
 	}
@@ -187,4 +199,16 @@ func (e *Echolet) customLog() {
 	default:
 		e.Logger.SetLevel(log.ERROR)
 	}
+}
+
+// LoadServerCofing...
+func loadServerConfig() *ServerConfig {
+	return gorux.LoadConfigFile("config/server.json", &ServerConfig{
+		Name:         "Biz WebAPI Server",
+		Developer:    "Steven Chen",
+		Version:      "v1.0.0",
+		Branch:       "dev",
+		LogLevel:     "off",
+		EnableLogger: false,
+	}).(*ServerConfig)
 }

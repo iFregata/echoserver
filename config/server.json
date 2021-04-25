@@ -1,6 +1,10 @@
 {
-  "name": "Gorux WebAPI Servr",
+  "name": "Biz WebAPI Servr",
+  "developer": "Steven Chen",
+  "version": "v1.0.0",
+  "branch": "dev",
+  "log_level": "debug",
+  "enable_logger": false,
   "port": 8181,
-  "context_path": "/api",
-  "log_level": "debug"
+  "context_path": "/api"
 }
