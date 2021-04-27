@@ -16,6 +16,8 @@ type Product struct {
 
 type Repos interface {
 	list(ctx context.Context) ([]Product, error)
+	findById(ctx context.Context, id int) (*Product, error)
+	findByIdFuture(ctx context.Context, id int) <-chan Result
 	create(ctx context.Context, p *Product) error
 	updateById(ctx context.Context, id int, p *Product) (*Product, error)
 	deleteById(ctx context.Context, id int) error
@@ -29,8 +31,33 @@ func NewRepos() Repos {
 	return &reposInteranl{dbc.ConnectMySQL()}
 }
 
+type Result struct {
+	Error   error
+	Product *Product
+}
+
+func (repos *reposInteranl) findByIdFuture(ctx context.Context, id int) <-chan Result {
+	future := make(chan Result)
+	go func() {
+		defer close(future)
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+		p, err := repos.findById(ctx, id)
+		future <- Result{Product: p, Error: err}
+	}()
+	return future
+}
+
+func (repos *reposInteranl) findById(ctx context.Context, id int) (*Product, error) {
+	return repos.selectById(ctx, id)
+}
+
 func (repos *reposInteranl) list(ctx context.Context) ([]Product, error) {
-	rows, err := repos.QueryContext(ctx, "select id,title,price,date_created from product order by id")
+	rows, err := repos.QueryContext(ctx,
+		"select id,title,price,date_created from product order by id")
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +74,8 @@ func (repos *reposInteranl) list(ctx context.Context) ([]Product, error) {
 	return list, nil
 }
 func (repos *reposInteranl) create(ctx context.Context, p *Product) error {
-	stmt, err := repos.PrepareContext(ctx, "insert into product(title,price,date_created) values(?,?,?)")
+	stmt, err := repos.PrepareContext(ctx,
+		"insert into product(title,price,date_created) values(?,?,?)")
 	if err != nil {
 		return err
 	}
@@ -66,7 +94,8 @@ func (repos *reposInteranl) create(ctx context.Context, p *Product) error {
 }
 
 func (repos *reposInteranl) updateById(ctx context.Context, id int, p *Product) (*Product, error) {
-	stmt, err := repos.PrepareContext(ctx, "update product set title=?, price=?, date_created=? where id=?")
+	stmt, err := repos.PrepareContext(ctx,
+		"update product set title=?, price=?, date_created=? where id=?")
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +109,8 @@ func (repos *reposInteranl) updateById(ctx context.Context, id int, p *Product) 
 }
 
 func (repos *reposInteranl) deleteById(ctx context.Context, id int) error {
-	stmt, err := repos.PrepareContext(ctx, "delete from product where id=?")
+	stmt, err := repos.PrepareContext(ctx,
+		"delete from product where id=?")
 	if err != nil {
 		return err
 	}
@@ -91,7 +121,9 @@ func (repos *reposInteranl) deleteById(ctx context.Context, id int) error {
 
 func (repos *reposInteranl) selectById(ctx context.Context, id int) (*Product, error) {
 	p := new(Product)
-	err := repos.QueryRowContext(ctx, "select id,title,price,date_created from product where id=?", id).Scan(&p.Id, &p.Title, &p.Price, &p.DateCreated)
+	err := repos.QueryRowContext(ctx,
+		"select id,title,price,date_created from product where id=?",
+		id).Scan(&p.Id, &p.Title, &p.Price, &p.DateCreated)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}

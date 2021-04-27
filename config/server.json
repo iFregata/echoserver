@@ -4,7 +4,7 @@
   "version": "v1.0.0",
   "branch": "dev",
   "log_level": "debug",
-  "enable_logger": false,
+  "enable_logger": true,
   "port": 8181,
   "context_path": "/api"
 }

@@ -50,6 +50,14 @@ func New() EchoNi {
 	echo := EchoNi{echo.New()}
 	echo.Static(pathOf("/assets"), "assets")
 	echo.HideBanner = true
+
+	//echo.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{Timeout: 30 * time.Second}))
+
+	// Recover middleware recovers from panics
+	// anywhere in the chain, prints stack trace and handles
+	// the control to the centralized HTTPErrorHandler.
+	echo.Use(middleware.Recover())
+
 	// Custom log level and setup Logger middleware logs
 	// the information about each HTTP request.
 	echo.customLog()

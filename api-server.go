@@ -11,10 +11,34 @@ func startAPIServer() {
 
 	ex.POST("/products", createProduct)
 	ex.GET("/products", listProducts)
+	ex.GET("/products/:id", findProduct)
+	ex.GET("/async/products/:id", findProductAsync)
 	ex.PUT("/products/:id", updateProduct)
 	ex.DELETE("/products/:id", deleteProduct)
 
 	ex.Serve()
+}
+
+func findProductAsync(rc echox.RoutingContext) error {
+	strid := rc.Param("id")
+	id, err := strconv.Atoi(strid)
+	if err != nil {
+		return rc.BadRequest()
+	}
+	result := <-repos.findByIdFuture(rc.Request().Context(), id)
+	//rs, err := repos.findById(rc.Request().Context(), id)
+	// result := <-r
+	return rc.JsonWrap(result.Product, result.Error)
+}
+
+func findProduct(rc echox.RoutingContext) error {
+	strid := rc.Param("id")
+	id, err := strconv.Atoi(strid)
+	if err != nil {
+		return rc.BadRequest()
+	}
+	rs, err := repos.findById(rc.Request().Context(), id)
+	return rc.JsonWrap(rs, err)
 }
 
 func createProduct(rc echox.RoutingContext) error {
