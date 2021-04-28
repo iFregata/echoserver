@@ -44,3 +44,17 @@ NOTE: 本文档用于合作伙伴间产品及技术整合使用，未经著作�
 == 概要
 
 TODO
+
+== HTTPie
+
+----
+http -v :8181/api/products
+
+http -v :8181/api/products/5
+
+http -v :8181/api/products title=abc price:=930300
+
+http -v PUT :8181/api/products/6 title=abc price:=890000
+
+http -v DELETE :8181/api/products/6
+----

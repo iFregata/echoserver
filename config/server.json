@@ -2,9 +2,9 @@
   "name": "Biz WebAPI Servr",
   "developer": "Steven Chen",
   "version": "v1.0.0",
-  "branch": "dev",
-  "log_level": "debug",
-  "enable_logger": true,
+  "branch": "prod",
+  "log_level": "off",
+  "enable_logger": false,
   "port": 8181,
   "context_path": "/api"
 }

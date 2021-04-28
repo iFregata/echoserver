@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"echoserver/dbc"
 	"time"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Product struct {
@@ -24,11 +26,11 @@ type Repos interface {
 }
 
 type reposInteranl struct {
-	*sql.DB
+	*pgxpool.Pool
 }
 
 func NewRepos() Repos {
-	return &reposInteranl{dbc.ConnectMySQL()}
+	return &reposInteranl{dbc.ConnectPostgres()}
 }
 
 type Result struct {
@@ -56,7 +58,7 @@ func (repos *reposInteranl) findById(ctx context.Context, id int) (*Product, err
 }
 
 func (repos *reposInteranl) list(ctx context.Context) ([]Product, error) {
-	rows, err := repos.QueryContext(ctx,
+	rows, err := repos.Query(ctx,
 		"select id,title,price,date_created from product order by id")
 	if err != nil {
 		return nil, err
@@ -74,34 +76,21 @@ func (repos *reposInteranl) list(ctx context.Context) ([]Product, error) {
 	return list, nil
 }
 func (repos *reposInteranl) create(ctx context.Context, p *Product) error {
-	stmt, err := repos.PrepareContext(ctx,
-		"insert into product(title,price,date_created) values(?,?,?)")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
 	p.DateCreated = time.Now().UnixNano() / int64(time.Millisecond)
-	rs, err := stmt.Exec(p.Title, p.Price, p.DateCreated)
+	err := repos.QueryRow(ctx,
+		"insert into product(title,price,date_created) values($1,$2,$3) returning id",
+		p.Title, p.Price, p.DateCreated).Scan(&p.Id)
 	if err != nil {
 		return err
 	}
-	lastId, err := rs.LastInsertId()
-	if err != nil {
-		return err
-	}
-	p.Id = lastId
 	return nil
 }
 
 func (repos *reposInteranl) updateById(ctx context.Context, id int, p *Product) (*Product, error) {
-	stmt, err := repos.PrepareContext(ctx,
-		"update product set title=?, price=?, date_created=? where id=?")
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
 	p.DateCreated = time.Now().UnixNano() / int64(time.Millisecond)
-	_, err = stmt.ExecContext(ctx, p.Title, p.Price, p.DateCreated, id)
+	_, err := repos.Exec(ctx,
+		"update product set title=$1, price=$2, date_created=$3 where id=$4",
+		p.Title, p.Price, p.DateCreated, id)
 	if err != nil {
 		return nil, err
 	}
@@ -109,20 +98,18 @@ func (repos *reposInteranl) updateById(ctx context.Context, id int, p *Product) 
 }
 
 func (repos *reposInteranl) deleteById(ctx context.Context, id int) error {
-	stmt, err := repos.PrepareContext(ctx,
-		"delete from product where id=?")
+	_, err := repos.Exec(ctx,
+		"delete from product where id=$1", id)
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
-	_, _ = stmt.ExecContext(ctx, id)
 	return nil
 }
 
 func (repos *reposInteranl) selectById(ctx context.Context, id int) (*Product, error) {
 	p := new(Product)
-	err := repos.QueryRowContext(ctx,
-		"select id,title,price,date_created from product where id=?",
+	err := repos.QueryRow(ctx,
+		"select id,title,price,date_created from product where id=$1",
 		id).Scan(&p.Id, &p.Title, &p.Price, &p.DateCreated)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
