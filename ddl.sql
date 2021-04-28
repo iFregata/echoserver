@@ -5,8 +5,8 @@ create table product(
   date_created bigint not null
 );
 
-insert into product(title,price,date_created) value('iPhone12Mini','799000',1618652851556);
-insert into product(title,price,date_created) value('iPhone12','899000',1618652851556);
-insert into product(title,price,date_created) value('iPhone12Pro','999000',1618652851556);
-insert into product(title,price,date_created) value('iPhone12Pro256','1099000',1618652851556);
-insert into product(title,price,date_created) value('iPhone12SE','399000',1618652851556);
+insert into product(title,price,date_created) values('iPhone12Mini','799000',1618652851556);
+insert into product(title,price,date_created) values('iPhone12','899000',1618652851556);
+insert into product(title,price,date_created) values('iPhone12Pro','999000',1618652851556);
+insert into product(title,price,date_created) values('iPhone12Pro256','1099000',1618652851556);
+insert into product(title,price,date_created) values('iPhone12SE','399000',1618652851556);

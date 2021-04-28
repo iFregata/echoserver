@@ -3,7 +3,7 @@ package main
 var repos Repos
 
 func init() {
-	repos = NewRepos()
+	//repos = NewRepos()
 }
 
 func main() {

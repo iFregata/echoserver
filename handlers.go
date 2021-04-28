@@ -6,19 +6,6 @@ import (
 	"strconv"
 )
 
-func startAPIServer() {
-	ex := echox.New()
-
-	ex.POST("/products", createProduct)
-	ex.GET("/products", listProducts)
-	ex.GET("/products/:id", findProduct)
-	ex.GET("/async/products/:id", findProductAsync)
-	ex.PUT("/products/:id", updateProduct)
-	ex.DELETE("/products/:id", deleteProduct)
-
-	ex.Serve()
-}
-
 func findProductAsync(rc echox.RoutingContext) error {
 	strid := rc.Param("id")
 	id, err := strconv.Atoi(strid)
@@ -26,8 +13,6 @@ func findProductAsync(rc echox.RoutingContext) error {
 		return rc.BadRequest()
 	}
 	result := <-repos.findByIdFuture(rc.Request().Context(), id)
-	//rs, err := repos.findById(rc.Request().Context(), id)
-	// result := <-r
 	return rc.JsonWrap(result.Product, result.Error)
 }
 
